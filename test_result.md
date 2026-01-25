@@ -236,6 +236,31 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
+      🔧 CRITICAL FIX APPLIED: Backend Routes Registration
+      
+      ISSUE IDENTIFIED:
+      - Backend routes /api/banker/compare and /api/banker/validate were defined but not accessible
+      - Problem: app.include_router(api_router) was called BEFORE route definitions
+      - Routes defined after router inclusion weren't being registered
+      
+      FIX APPLIED:
+      - Moved app.include_router(api_router) to END of server.py (after all route definitions)
+      - Both banker endpoints now properly registered
+      
+      VERIFICATION:
+      ✅ GET /api/ - Working
+      ✅ POST /api/status - Working  
+      ✅ POST /api/banker/compare - NOW WORKING (returns comparative metrics)
+      ✅ POST /api/banker/validate - NOW WORKING (returns mistake detections)
+      
+      Tested with sample data:
+      - Mistake detection correctly identifies allocation>max errors
+      - Comparison endpoint calculates utilization, safety margin, divergence scores
+      
+      Ready for frontend integration testing.
+  
+  - agent: "main"
+    message: |
       Implemented three new features for Banker's Algorithm simulator:
       
       ✅ Feature 1: Export/Import System State
