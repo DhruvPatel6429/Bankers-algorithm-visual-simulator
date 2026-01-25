@@ -47,21 +47,41 @@ const ScenarioPanelContent = React.memo(({ scenarioId, onStateChange, showCloseB
     activeProcess,
   } = bankerState;
 
-  // Notify parent of state changes
+  // Track previous state to avoid unnecessary onStateChange calls
+  const prevStateRef = useRef();
+  
+  // Notify parent of state changes - only when actual values change
   useEffect(() => {
-    if (onStateChange) {
-      onStateChange({
-        numProcesses,
-        numResources,
-        allocation,
-        max,
-        available,
-        need,
-        safetyResult
-      });
+    const currentState = {
+      numProcesses,
+      numResources,
+      allocation,
+      max,
+      available,
+      need,
+      safetyResult
+    };
+    
+    const currentStateStr = JSON.stringify(currentState);
+    const prevStateStr = JSON.stringify(prevStateRef.current);
+    
+    // Only call onStateChange if state actually changed
+    if (onStateChange && prevStateStr !== currentStateStr) {
+      console.log(`Scenario ${scenarioId}: State changed`);
+      onStateChange(currentState);
+      prevStateRef.current = currentState;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numProcesses, numResources, allocation, max, available, need, safetyResult]);
+  }, [
+    numProcesses, 
+    numResources, 
+    JSON.stringify(allocation), 
+    JSON.stringify(max), 
+    JSON.stringify(available), 
+    JSON.stringify(need), 
+    JSON.stringify(safetyResult),
+    scenarioId
+  ]);
 
   return (
     <div className="flex flex-col h-full">
