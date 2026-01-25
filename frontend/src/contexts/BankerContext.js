@@ -296,6 +296,19 @@ export const BankerProvider = ({ children }) => {
     setSafetyResult(null);
   }, []);
 
+  // Import state from JSON
+  const importState = useCallback((importedData) => {
+    setNumProcesses(importedData.numProcesses);
+    setNumResources(importedData.numResources);
+    setAllocation(importedData.allocation);
+    setMax(importedData.max);
+    setAvailable(importedData.available);
+    setAnimationSpeed(importedData.animationSpeed);
+    setSafetyResult(null);
+    setCurrentStep(null);
+    setActiveProcess(null);
+  }, []);
+
   const value = {
     numProcesses,
     numResources,
