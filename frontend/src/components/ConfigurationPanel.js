@@ -29,6 +29,8 @@ export const ConfigurationPanel = () => {
     importState,
   } = useBanker();
 
+  const { isActive: isTutorialActive } = useTutorial();
+
   const [tempProcesses, setTempProcesses] = React.useState(numProcesses);
   const [tempResources, setTempResources] = React.useState(numResources);
   const fileInputRef = React.useRef(null);
