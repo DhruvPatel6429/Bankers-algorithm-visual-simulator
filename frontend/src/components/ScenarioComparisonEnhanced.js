@@ -402,7 +402,13 @@ export const ScenarioComparisonEnhanced = ({ onClose }) => {
 export const ComparisonModeToggle = () => {
   const [isComparing, setIsComparing] = useState(false);
 
+  const handleToggle = () => {
+    console.log('Compare button clicked, current state:', isComparing);
+    setIsComparing(true);
+  };
+
   if (isComparing) {
+    console.log('Rendering comparison view');
     return <ScenarioComparisonEnhanced onClose={() => setIsComparing(false)} />;
   }
 
@@ -410,7 +416,7 @@ export const ComparisonModeToggle = () => {
     <Button
       variant="outline"
       size="sm"
-      onClick={() => setIsComparing(true)}
+      onClick={handleToggle}
       className="gap-2"
       data-testid="start-comparison-btn"
     >
