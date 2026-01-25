@@ -1,0 +1,134 @@
+{
+  "identity": {
+    "persona": "E1: The Anti-AI Designer",
+    "mission": "Create a Banker's Algorithm simulation that feels like a high-stakes 'Quantum Lab' interface rather than a textbook diagram. Academic rigor meets futuristic precision.",
+    "principles": [
+      "Fusion: Operating Systems logic + FinTech dashboard density.",
+      "Emotion: The tension of 'Deadlock' vs. the relief of 'Safe State'.",
+      "Content: Data is the art. Matrices are beautiful grids, not spreadsheets.",
+      "Contrast: Deep dark backgrounds with luminous, neon data points."
+    ]
+  },
+  "typography": {
+    "primary_font": "Inter",
+    "secondary_font": "JetBrains Mono",
+    "usage": {
+      "headings": "Inter, font-bold, tracking-tight (e.g., 'System State', 'Resource Allocation')",
+      "body": "Inter, font-normal, text-muted-foreground",
+      "data_values": "JetBrains Mono, font-medium (CRITICAL for matrix alignment)",
+      "code_snippets": "JetBrains Mono, text-xs, bg-muted/50 p-1 rounded"
+    }
+  },
+  "colors": {
+    "theme": "dark",
+    "palette": {
+      "background": {
+        "default": "#09090b",
+        "paper": "#18181b",
+        "subtle": "#27272a"
+      },
+      "primary": {
+        "main": "#3b82f6",
+        "glow": "0 0 20px rgba(59, 130, 246, 0.5)"
+      },
+      "status": {
+        "safe": "#10b981",
+        "safe_glow": "0 0 20px rgba(16, 185, 129, 0.4)",
+        "unsafe": "#ef4444",
+        "unsafe_glow": "0 0 20px rgba(239, 68, 68, 0.4)",
+        "warning": "#f59e0b"
+      },
+      "data": {
+        "allocation": "#3b82f6",
+        "max": "#8b5cf6",
+        "need": "#f97316",
+        "available": "#10b981"
+      }
+    },
+    "gradients": {
+      "safe_state": "linear-gradient(135deg, #064e3b 0%, #10b981 100%)",
+      "unsafe_state": "linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%)"
+    }
+  },
+  "layout": {
+    "grid_system": "Bento Grid Mode B (High Density)",
+    "spacing": {
+      "container_padding": "p-6 md:p-8",
+      "gap": "gap-4 md:gap-6",
+      "internal_padding": "p-4"
+    },
+    "structure": {
+      "sidebar": "col-span-12 md:col-span-3 lg:col-span-3 (Configuration Panel)",
+      "main_stage": "col-span-12 md:col-span-9 lg:col-span-6 (Visualization & Matrices)",
+      "stats_panel": "col-span-12 md:col-span-12 lg:col-span-3 (Resource Graphs & Theory)"
+    }
+  },
+  "components": {
+    "MatrixGrid": {
+      "description": "A visual grid representing Allocation, Max, or Need matrices.",
+      "style": "grid gap-1",
+      "cell_style": "h-10 w-10 flex items-center justify-center rounded-md border border-border/50 bg-card text-sm font-mono transition-all duration-300",
+      "active_cell_style": "border-primary bg-primary/10 text-primary scale-110 shadow-[0_0_10px_rgba(59,130,246,0.3)]",
+      "header_style": "text-xs font-semibold text-muted-foreground text-center mb-2"
+    },
+    "ProcessCard": {
+      "description": "Card representing a single process in the queue.",
+      "style": "flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:border-primary/50 transition-colors",
+      "status_indicator": "w-2 h-2 rounded-full"
+    },
+    "ResourceChart": {
+      "library": "Recharts",
+      "type": "BarChart (Stacked)",
+      "props": {
+        "layout": "vertical",
+        "barSize": 20,
+        "margin": { "top": 0, "right": 0, "bottom": 0, "left": 0 }
+      }
+    },
+    "ControlPanel": {
+      "style": "space-y-4 p-4 rounded-xl border border-border bg-card/50 backdrop-blur-sm",
+      "input_style": "font-mono text-sm"
+    }
+  },
+  "motion": {
+    "library": "tailwindcss-animate",
+    "animations": {
+      "fade_in": "animate-in fade-in duration-500",
+      "slide_up": "animate-in slide-in-from-bottom-4 duration-500",
+      "pulse_glow": "animate-pulse",
+      "matrix_update": "transition-all duration-300 ease-out"
+    },
+    "micro_interactions": {
+      "hover_lift": "hover:-translate-y-0.5 transition-transform duration-200",
+      "button_press": "active:scale-95 transition-transform duration-100"
+    }
+  },
+  "assets": {
+    "icons": "Lucide React",
+    "required_icons": [
+      "Cpu (Process)",
+      "Database (Resource)",
+      "AlertTriangle (Unsafe)",
+      "CheckCircle2 (Safe)",
+      "Play (Run)",
+      "RotateCcw (Reset)",
+      "BookOpen (Theory)"
+    ]
+  },
+  "instructions_to_main_agent": [
+    "1. USE RECHARTS instead of Chart.js. It is already installed in package.json.",
+    "2. IGNORE 'Vanilla JS' requirement in problem statement; use the provided React + Tailwind + Shadcn stack.",
+    "3. IMPLEMENT 'MatrixGrid' as a reusable component. It is the core visual element.",
+    "4. ENSURE the 'Need' matrix updates automatically when 'Allocation' or 'Max' changes.",
+    "5. USE 'sonner' for all system notifications (e.g., 'Request Granted', 'Unsafe State Detected').",
+    "6. CREATE a 'SimulationContext' or use a global store to manage the algorithm state (Available, Allocation, Need, etc.) to avoid prop drilling hell.",
+    "7. ADD 'data-testid' to all inputs and buttons (e.g., 'input-allocation-p0-r1', 'btn-calculate')."
+  ],
+  "universal_guidelines": [
+    "Do not use gradients for text.",
+    "Use 'backdrop-blur-md' for overlays and sticky headers.",
+    "Ensure all text inputs have 'font-mono' for numerical data.",
+    "Never use pure black (#000000); use #09090b or #020617.",
+    "Add subtle borders (border-white/5) to cards to define edges in dark mode."
+  ]
+}
