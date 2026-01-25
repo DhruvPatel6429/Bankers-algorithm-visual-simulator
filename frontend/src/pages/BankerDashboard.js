@@ -1,5 +1,6 @@
 import React from 'react';
 import { useBanker } from '@/contexts/BankerContext';
+import { useTutorial } from '@/contexts/TutorialContext';
 import { MatrixDisplay, VectorDisplay } from '@/components/MatrixDisplay';
 import { SystemResourceChart, ProcessResourceChart } from '@/components/ResourceCharts';
 import { ResourceRequestForm } from '@/components/ResourceRequestForm';
@@ -7,7 +8,10 @@ import { SafetyAlgorithmDisplay } from '@/components/SafetyAlgorithmDisplay';
 import { ProcessList } from '@/components/ProcessList';
 import { TheoryPanel } from '@/components/TheoryPanel';
 import { ConfigurationPanel } from '@/components/ConfigurationPanel';
+import { TutorialOverlay, TutorialToggle } from '@/components/TutorialOverlay';
+import { ComparisonModeToggle } from '@/components/ScenarioComparison';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { FEATURES } from '@/config/features';
 
 export const BankerDashboard = () => {
   const {
