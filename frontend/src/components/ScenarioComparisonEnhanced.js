@@ -30,7 +30,7 @@ const ScenarioPanel = ({ scenarioId, onStateChange, showCloseButton = true }) =>
 };
 
 // Panel content that uses the isolated context
-const ScenarioPanelContent = ({ scenarioId, onStateChange, showCloseButton }) => {
+const ScenarioPanelContent = React.memo(({ scenarioId, onStateChange, showCloseButton }) => {
   const bankerState = useBanker();
   const {
     numProcesses,
