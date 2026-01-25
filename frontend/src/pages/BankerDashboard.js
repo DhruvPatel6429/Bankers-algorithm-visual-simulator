@@ -27,6 +27,8 @@ export const BankerDashboard = () => {
     activeProcess,
   } = useBanker();
 
+  const { isActive: isTutorialActive } = useTutorial();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-card/20">
       {/* Header */}
