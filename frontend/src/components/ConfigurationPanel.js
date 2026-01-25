@@ -145,6 +145,7 @@ export const ConfigurationPanel = () => {
             onClick={handleApplyDimensions}
             className="w-full"
             variant="secondary"
+            disabled={isTutorialActive}
             data-testid="apply-dimensions-btn"
           >
             Apply Dimensions
