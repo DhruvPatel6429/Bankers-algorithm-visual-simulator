@@ -199,7 +199,7 @@ const ScenarioPanelContent = React.memo(({ scenarioId, onStateChange, showCloseB
       </ScrollArea>
     </div>
   );
-};
+});
 
 // Main Enhanced Comparison Component
 export const ScenarioComparisonEnhanced = ({ onClose }) => {
