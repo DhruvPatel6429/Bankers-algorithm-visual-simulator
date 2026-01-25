@@ -420,7 +420,11 @@ export const ComparisonModeToggle = () => {
 
   if (isComparing) {
     console.log('Rendering comparison view');
-    return <ScenarioComparisonEnhanced onClose={() => setIsComparing(false)} />;
+    // Use portal to render at root level
+    return ReactDOM.createPortal(
+      <ScenarioComparisonEnhanced onClose={() => setIsComparing(false)} />,
+      document.body
+    );
   }
 
   return (
