@@ -70,7 +70,7 @@ export const BankerProvider = ({ children }) => {
     setSafetyResult(null);
   }, []);
 
-  const updateAllocation = useCallback((processIndex, resourceIndex, value) => {
+  const updateAllocation = useCallback((processIndex, resourceIndex, value, skipTutorialCheck = false) => {
     setAllocation(prev => {
       const newAllocation = [...prev];
       newAllocation[processIndex] = [...newAllocation[processIndex]];
