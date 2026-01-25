@@ -14,17 +14,67 @@ export const ConfigurationPanel = () => {
     numProcesses,
     numResources,
     animationSpeed,
+    allocation,
+    max,
+    available,
+    need,
+    safetyResult,
     setAnimationSpeed,
     updateDimensions,
     resetSystem,
     loadExample,
+    importState,
   } = useBanker();
 
   const [tempProcesses, setTempProcesses] = React.useState(numProcesses);
   const [tempResources, setTempResources] = React.useState(numResources);
+  const fileInputRef = React.useRef(null);
 
   const handleApplyDimensions = () => {
     updateDimensions(tempProcesses, tempResources);
+  };
+
+  const handleExport = () => {
+    exportSystemState({
+      numProcesses,
+      numResources,
+      allocation,
+      max,
+      available,
+      need,
+      safetyResult,
+      animationSpeed
+    });
+    toast.success('State Exported', {
+      description: 'System state downloaded as JSON file'
+    });
+  };
+
+  const handleImport = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = importSystemState(e.target?.result);
+      
+      if (result.success) {
+        importState(result.data);
+        toast.success('State Imported', {
+          description: 'System state loaded successfully'
+        });
+      } else {
+        toast.error('Import Failed', {
+          description: result.error
+        });
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const speedLabels = {
