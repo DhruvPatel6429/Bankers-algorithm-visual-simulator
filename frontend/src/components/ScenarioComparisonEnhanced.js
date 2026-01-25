@@ -303,7 +303,7 @@ export const ScenarioComparisonEnhanced = ({ onClose }) => {
                 >
                   <ScenarioPanel 
                     scenarioId={1}
-                    onStateChange={setStateA}
+                    onStateChange={handleStateAChange}
                     showCloseButton={false}
                   />
                 </div>
@@ -316,7 +316,7 @@ export const ScenarioComparisonEnhanced = ({ onClose }) => {
                 >
                   <ScenarioPanel 
                     scenarioId={2}
-                    onStateChange={setStateB}
+                    onStateChange={handleStateBChange}
                     showCloseButton={false}
                   />
                 </div>
