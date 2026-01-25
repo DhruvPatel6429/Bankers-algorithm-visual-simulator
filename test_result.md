@@ -101,3 +101,164 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Extend existing Banker's Algorithm simulator with three new features:
+  1. Export/Import System State - Save and load system configurations as JSON
+  2. Guided Tutorial Mode - Step-by-step educational overlay
+  3. Side-by-Side Scenario Comparison - Compare two independent scenarios
+
+frontend:
+  - task: "Feature Flags Configuration"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/config/features.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created feature flags for exportImport, tutorialMode, and comparisonMode"
+
+  - task: "State Validation Utilities"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/utils/stateValidation.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Added isValidBankerState and cloneBankerState utilities with comprehensive validation"
+
+  - task: "Export/Import UI Integration"
+    implemented: true
+    working: "needs_testing"
+    file: "/app/frontend/src/components/ConfigurationPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "needs_testing"
+        agent: "main"
+        comment: "Added Export/Import buttons to ConfigurationPanel with state validation before import"
+
+  - task: "Tutorial Context & State Machine"
+    implemented: true
+    working: "needs_testing"
+    file: "/app/frontend/src/contexts/TutorialContext.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "needs_testing"
+        agent: "main"
+        comment: "Created TutorialContext with state machine (overview → matrices → safety → request → outcome → completed)"
+
+  - task: "Tutorial Overlay Component"
+    implemented: true
+    working: "needs_testing"
+    file: "/app/frontend/src/components/TutorialOverlay.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "needs_testing"
+        agent: "main"
+        comment: "Created TutorialOverlay with step navigation, escape key handling, and TutorialToggle button"
+
+  - task: "Tutorial Mode - Edit Locking"
+    implemented: true
+    working: "needs_testing"
+    file: "/app/frontend/src/pages/BankerDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "needs_testing"
+        agent: "main"
+        comment: "Matrix and vector editing disabled during tutorial mode via editable prop"
+
+  - task: "Scenario Comparison Component"
+    implemented: true
+    working: "needs_testing"
+    file: "/app/frontend/src/components/ScenarioComparison.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "needs_testing"
+        agent: "main"
+        comment: "Created side-by-side comparison with isolated BankerProvider contexts and independent chart instances"
+
+  - task: "App Integration - Tutorial & Comparison"
+    implemented: true
+    working: "needs_testing"
+    file: "/app/frontend/src/App.js, /app/frontend/src/pages/BankerDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "needs_testing"
+        agent: "main"
+        comment: "Integrated TutorialProvider and added tutorial/comparison toggle buttons to dashboard header"
+
+backend:
+  - task: "No backend changes required"
+    implemented: true
+    working: "NA"
+    file: "NA"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "All features are frontend-only, no backend modifications needed"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Export/Import UI Integration"
+    - "Tutorial Mode Flow"
+    - "Scenario Comparison Isolation"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "sequential"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Implemented three new features for Banker's Algorithm simulator:
+      
+      ✅ Feature 1: Export/Import System State
+      - Added Export/Import buttons to ConfigurationPanel
+      - State validation using isValidBankerState before import
+      - Routes through Context importState action (no direct mutation)
+      
+      ✅ Feature 2: Guided Tutorial Mode
+      - Tutorial state machine: overview → matrices → safety → request → outcome → completed
+      - TutorialOverlay component with navigation and escape key support
+      - Matrix editing locked during tutorial (editable={!isTutorialActive})
+      - Educational content for each step
+      
+      ✅ Feature 3: Side-by-Side Scenario Comparison
+      - Two isolated BankerProvider contexts (no shared state)
+      - Each scenario has independent chart instances
+      - ComparisonModeToggle button in header
+      - Full-screen comparison view with side-by-side panels
+      
+      All features follow recommendations:
+      - Feature flags in config/features.js
+      - State validation before commits
+      - Tutorial uses state machine (not conditionals)
+      - Scenarios have isolated contexts (no chart sharing)
+      
+      Ready for frontend testing.
