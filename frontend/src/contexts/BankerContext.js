@@ -330,7 +330,8 @@ export const BankerProvider = ({ children }) => {
     requestResources,
     terminateProcess,
     resetSystem,
-    loadExample
+    loadExample,
+    importState
   };
 
   return (
