@@ -31,6 +31,9 @@ export const BankerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-card/20">
+      {/* Tutorial Overlay */}
+      {FEATURES.tutorialMode && <TutorialOverlay />}
+      
       {/* Header */}
       <header className="border-b border-border/50 bg-card/30 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
@@ -43,9 +46,18 @@ export const BankerDashboard = () => {
                 Deadlock Avoidance & Safety Verification
               </p>
             </div>
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/50">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-sm font-medium">System Active</span>
+            <div className="flex items-center gap-3">
+              {/* Tutorial Toggle */}
+              {FEATURES.tutorialMode && <TutorialToggle />}
+              
+              {/* Comparison Mode Toggle */}
+              {FEATURES.comparisonMode && <ComparisonModeToggle />}
+              
+              {/* System Status */}
+              <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/50">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-sm font-medium">System Active</span>
+              </div>
             </div>
           </div>
         </div>
