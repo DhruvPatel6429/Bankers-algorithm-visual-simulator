@@ -26,7 +26,6 @@ const ScenarioPanel = ({ scenarioId, onClose, showCloseButton = true }) => {
 
 // Panel content that uses the isolated context
 const ScenarioPanelContent = ({ scenarioId, onClose, showCloseButton }) => {
-  const { useBanker } = require('@/contexts/BankerContext');
   const {
     numProcesses,
     numResources,
