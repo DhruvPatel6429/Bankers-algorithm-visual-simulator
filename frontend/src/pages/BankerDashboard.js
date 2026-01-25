@@ -74,7 +74,7 @@ export const BankerDashboard = () => {
           {/* Main Content Area */}
           <div className="col-span-12 lg:col-span-6 space-y-6">
             {/* Matrices Section */}
-            <div className="space-y-4">
+            <div className="space-y-4" id="matrices-section">
               <h2 className="text-xl font-bold tracking-tight">System State Matrices</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -84,7 +84,7 @@ export const BankerDashboard = () => {
                   numProcesses={numProcesses}
                   numResources={numResources}
                   onEdit={updateAllocation}
-                  editable={true}
+                  editable={!isTutorialActive}
                   colorClass="text-blue-400"
                   activeProcess={activeProcess}
                   dataTestIdPrefix="allocation"
@@ -96,7 +96,7 @@ export const BankerDashboard = () => {
                   numProcesses={numProcesses}
                   numResources={numResources}
                   onEdit={updateMax}
-                  editable={true}
+                  editable={!isTutorialActive}
                   colorClass="text-purple-400"
                   activeProcess={activeProcess}
                   dataTestIdPrefix="max"
@@ -120,7 +120,7 @@ export const BankerDashboard = () => {
                   vector={available}
                   numResources={numResources}
                   onEdit={updateAvailable}
-                  editable={true}
+                  editable={!isTutorialActive}
                   colorClass="text-green-400"
                   dataTestIdPrefix="available"
                 />
@@ -129,8 +129,12 @@ export const BankerDashboard = () => {
 
             {/* Algorithm & Request Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <SafetyAlgorithmDisplay />
-              <ResourceRequestForm />
+              <div id="safety-algorithm-section">
+                <SafetyAlgorithmDisplay />
+              </div>
+              <div id="resource-request-section">
+                <ResourceRequestForm />
+              </div>
             </div>
 
             {/* System Resource Chart */}
