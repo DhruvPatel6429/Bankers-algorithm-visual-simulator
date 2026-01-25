@@ -59,7 +59,8 @@ const ScenarioPanelContent = ({ scenarioId, onStateChange, showCloseButton }) =>
         safetyResult
       });
     }
-  }, [numProcesses, numResources, allocation, max, available, need, safetyResult, onStateChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [numProcesses, numResources, allocation, max, available, need, safetyResult]);
 
   return (
     <div className="flex flex-col h-full">
