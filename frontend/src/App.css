@@ -28,6 +28,17 @@
     color: #61dafb;
 }
 
+.App-link img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.App-link img:hover {
+    transform: scale(1.1);
+}
+
 @keyframes App-logo-spin {
     from {
         transform: rotate(0deg);
