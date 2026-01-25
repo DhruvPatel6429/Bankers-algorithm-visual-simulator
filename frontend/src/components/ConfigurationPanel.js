@@ -192,6 +192,41 @@ export const ConfigurationPanel = () => {
           </Button>
         </div>
 
+        {/* Export/Import State */}
+        {FEATURES.exportImport && (
+          <div className="space-y-2 pt-4 border-t border-border/50">
+            <Label className="text-sm text-muted-foreground block mb-2">
+              State Management
+            </Label>
+            <Button 
+              onClick={handleExport}
+              variant="outline"
+              className="w-full justify-start"
+              data-testid="export-state-btn"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export State
+            </Button>
+            <Button 
+              onClick={() => fileInputRef.current?.click()}
+              variant="outline"
+              className="w-full justify-start"
+              data-testid="import-state-btn"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Import State
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleImport}
+              className="hidden"
+              data-testid="file-input"
+            />
+          </div>
+        )}
+
         {/* Reset */}
         <div className="pt-4 border-t border-border/50">
           <Button 
