@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import { BankerProvider, useBanker } from '@/contexts/BankerContext';
 import { ComparisonProvider } from '@/contexts/ComparisonContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
