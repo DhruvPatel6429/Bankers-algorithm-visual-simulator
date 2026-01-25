@@ -171,6 +171,19 @@ export const BankerDashboard = () => {
           {/* Right Sidebar - Process Control & Theory */}
           <div className="col-span-12 lg:col-span-3 space-y-6">
             <ProcessList />
+            
+            {/* Mistake Detection Panel */}
+            <MistakeDetectionPanel 
+              bankerState={bankerState}
+              isActive={true}
+            />
+            
+            {/* Step Justification Panel */}
+            <StepJustificationPanel 
+              safetyResult={safetyResult}
+              isRunning={isRunning}
+            />
+            
             <TheoryPanel />
           </div>
         </div>
