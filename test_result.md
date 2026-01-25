@@ -205,6 +205,36 @@ frontend:
         agent: "main"
         comment: "Integrated TutorialProvider and added tutorial/comparison toggle buttons to dashboard header"
 
+  - task: "Backend API: /api/banker/compare"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Route defined but not registered due to router inclusion order"
+      - working: true
+        agent: "main"
+        comment: "FIXED: Moved app.include_router(api_router) to end of file. Tested with curl - returns correct comparative metrics"
+
+  - task: "Backend API: /api/banker/validate"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Route defined but not registered due to router inclusion order"
+      - working: true
+        agent: "main"
+        comment: "FIXED: Moved app.include_router(api_router) to end of file. Tested with curl - correctly detects allocation>max errors"
+
 backend:
   - task: "No backend changes required"
     implemented: true
