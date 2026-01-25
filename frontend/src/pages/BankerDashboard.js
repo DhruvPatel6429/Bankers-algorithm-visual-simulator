@@ -27,9 +27,22 @@ export const BankerDashboard = () => {
     updateMax,
     updateAvailable,
     activeProcess,
+    safetyResult,
+    isRunning,
   } = useBanker();
 
   const { isActive: isTutorialActive } = useTutorial();
+
+  // Get complete banker state for mistake detection
+  const bankerState = {
+    numProcesses,
+    numResources,
+    allocation,
+    max,
+    available,
+    need,
+    safetyResult
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-card/20">
