@@ -47,6 +47,18 @@ export const MistakeDetectionPanel = ({ bankerState, isActive = true }) => {
   const [dismissed, setDismissed] = useState([]);
   const [expanded, setExpanded] = useState(null);
 
+  // Create a stable dependency for state changes
+  const stateKey = useMemo(() => {
+    if (!bankerState) return '';
+    return JSON.stringify({
+      numProcesses: bankerState.numProcesses,
+      numResources: bankerState.numResources,
+      allocation: bankerState.allocation,
+      max: bankerState.max,
+      available: bankerState.available
+    });
+  }, [bankerState]);
+
   useEffect(() => {
     if (!isActive || !bankerState) return;
 
@@ -75,12 +87,7 @@ export const MistakeDetectionPanel = ({ bankerState, isActive = true }) => {
     // Debounce validation
     const timer = setTimeout(detectMistakes, 500);
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    bankerState?.numProcesses,
-    bankerState?.numResources,
-    isActive,
-  ]);
+  }, [stateKey, isActive, bankerState]);
 
   const activeMistakes = mistakes.filter(
     m => !dismissed.includes(`${m.mistake_type}-${m.location}`)
