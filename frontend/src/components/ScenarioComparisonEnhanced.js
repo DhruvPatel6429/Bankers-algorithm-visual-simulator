@@ -211,6 +211,15 @@ export const ScenarioComparisonEnhanced = ({ onClose }) => {
   const scrollAreaRefA = useRef(null);
   const scrollAreaRefB = useRef(null);
 
+  // Memoize state change handlers to prevent re-renders
+  const handleStateAChange = useCallback((newState) => {
+    setStateA(newState);
+  }, []);
+
+  const handleStateBChange = useCallback((newState) => {
+    setStateB(newState);
+  }, []);
+
   // Handle synchronized scrolling
   const handleScroll = (sourceRef, targetRef) => {
     if (!syncScrolling) return;
