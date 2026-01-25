@@ -61,6 +61,16 @@ export const ConfigurationPanel = () => {
       const result = importSystemState(e.target?.result);
       
       if (result.success) {
+        // Validate state before importing
+        const validation = isValidBankerState(result.data);
+        if (!validation.valid) {
+          toast.error('Invalid State', {
+            description: validation.errors[0] || 'State validation failed'
+          });
+          return;
+        }
+        
+        // Import through Context action
         importState(result.data);
         toast.success('State Imported', {
           description: 'System state loaded successfully'
