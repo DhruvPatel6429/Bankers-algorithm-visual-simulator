@@ -75,14 +75,11 @@ export const MistakeDetectionPanel = ({ bankerState, isActive = true }) => {
     // Debounce validation
     const timer = setTimeout(detectMistakes, 500);
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     bankerState?.numProcesses,
     bankerState?.numResources,
-    JSON.stringify(bankerState?.allocation),
-    JSON.stringify(bankerState?.max),
-    JSON.stringify(bankerState?.available),
     isActive,
-    bankerState
   ]);
 
   const activeMistakes = mistakes.filter(
