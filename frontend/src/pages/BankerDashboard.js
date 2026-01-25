@@ -9,6 +9,8 @@ import { ProcessList } from '@/components/ProcessList';
 import { TheoryPanel } from '@/components/TheoryPanel';
 import { ConfigurationPanel } from '@/components/ConfigurationPanel';
 import { TutorialOverlay, TutorialToggle } from '@/components/TutorialOverlay';
+import { StepJustificationPanel } from '@/components/StepJustificationPanel';
+import { MistakeDetectionPanel } from '@/components/MistakeDetectionPanel';
 import { ComparisonModeToggle } from '@/components/ScenarioComparisonEnhanced';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FEATURES } from '@/config/features';
