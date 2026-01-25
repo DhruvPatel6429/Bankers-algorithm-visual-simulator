@@ -280,3 +280,7 @@ async def validate_banker_state(state: BankerState):
         ))
     
     return mistakes
+
+
+# Include the router in the main app (after all route definitions)
+app.include_router(api_router)
