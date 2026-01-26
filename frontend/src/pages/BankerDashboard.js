@@ -147,10 +147,10 @@ export const BankerDashboard = () => {
             {/* Algorithm & Request Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div id="safety-algorithm-section">
-                <SafetyAlgorithmDisplay />
+                <StepByStepSafetyDisplay />
               </div>
               <div id="resource-request-section">
-                <ResourceRequestForm />
+                <InteractiveResourceRequest />
               </div>
             </div>
 
