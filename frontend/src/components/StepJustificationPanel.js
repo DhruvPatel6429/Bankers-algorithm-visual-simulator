@@ -30,31 +30,38 @@ export const StepJustificationPanel = ({ safetyResult, isRunning }) => {
       return [];
     }
 
-    return safetyResult.steps.map((step, index) => {
-      const processIndex = step.processIndex;
-      const work = step.work;
-      
-      return {
-        stepNumber: index + 1,
-        processIndex,
-        decision: 'grant',
-        condition: 'Need ≤ Work',
-        workBefore: index === 0 ? work : safetyResult.steps[index - 1].work,
-        workAfter: work,
-        explanation: `Process P${processIndex} can proceed because its resource needs are less than or equal to available resources (Work vector).`,
-        formalProof: {
-          premise: `Need[P${processIndex}] ≤ Work`,
-          conclusion: `P${processIndex} can execute and release resources`,
-          steps: [
-            `Check: Need[P${processIndex}][j] ≤ Work[j] for all resources j`,
-            `Verified: All conditions satisfied`,
-            `Action: Allocate resources to P${processIndex}`,
-            `Update: Work = Work + Allocation[P${processIndex}]`,
-            `Mark: P${processIndex} as finished`
-          ]
-        }
-      };
-    });
+    return safetyResult.steps
+      .filter(step => step.type === 'execute')  // Only process execution steps
+      .map((step, index) => {
+        const processIndex = step.processIndex;
+        const workBefore = step.workBefore || [];
+        const workAfter = step.workAfter || [];
+        const need = step.need || [];
+        const allocation = step.allocation || [];
+        
+        return {
+          stepNumber: step.stepNumber || index + 1,
+          processIndex,
+          decision: 'grant',
+          condition: 'Need ≤ Work',
+          workBefore,
+          workAfter,
+          need,
+          allocation,
+          explanation: step.explanation || `Process P${processIndex} can proceed because its resource needs are less than or equal to available resources (Work vector).`,
+          formalProof: {
+            premise: `Need[P${processIndex}] ≤ Work`,
+            conclusion: `P${processIndex} can execute and release resources`,
+            steps: [
+              `Check: Need[P${processIndex}][j] ≤ Work[j] for all resources j`,
+              `Verified: All conditions satisfied`,
+              `Action: Allocate resources to P${processIndex}`,
+              `Update: Work = Work + Allocation[P${processIndex}]`,
+              `Mark: P${processIndex} as finished`
+            ]
+          }
+        };
+      });
   };
 
   const justifications = generateJustifications();
