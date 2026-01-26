@@ -105,8 +105,8 @@ export const BankerProvider = ({ children }) => {
     });
   }, []);
 
-  // Banker's Safety Algorithm
-  const runSafetyAlgorithm = useCallback(async (tempAllocation = null, tempAvailable = null) => {
+  // Banker's Safety Algorithm with Step-by-Step Support
+  const runSafetyAlgorithm = useCallback(async (tempAllocation = null, tempAvailable = null, skipAnimation = false) => {
     setIsRunning(true);
     setSafetyResult(null);
     
@@ -114,35 +114,41 @@ export const BankerProvider = ({ children }) => {
     const work = [...(tempAvailable || available)];
     const finish = Array(numProcesses).fill(false);
     const safeSequence = [];
-    const steps = [];
+    const detailedSteps = [];
+    
+    // Initial state
+    detailedSteps.push({
+      type: 'init',
+      stepNumber: 0,
+      work: [...work],
+      finish: [...finish],
+      safeSequence: [],
+      message: 'Initializing Safety Algorithm',
+      explanation: `Work vector initialized to Available: [${work.join(', ')}]`
+    });
 
     let found = true;
+    let stepNumber = 1;
+    
     while (found && safeSequence.length < numProcesses) {
       found = false;
       
       for (let i = 0; i < numProcesses; i++) {
         if (!finish[i]) {
           let canExecute = true;
+          const needVals = [];
           
           // Check if Need[i] <= Work
           for (let j = 0; j < numResources; j++) {
             const needValue = max[i][j] - alloc[i][j];
+            needVals.push(needValue);
             if (needValue > work[j]) {
               canExecute = false;
-              break;
             }
           }
           
           if (canExecute) {
-            // Animate this step
-            setActiveProcess(i);
-            setCurrentStep({
-              processIndex: i,
-              work: [...work],
-              message: `Process P${i} can execute. Need ≤ Work.`
-            });
-            
-            await new Promise(resolve => setTimeout(resolve, animationSpeed));
+            const workBefore = [...work];
             
             // Add resources back to work
             for (let j = 0; j < numResources; j++) {
@@ -153,31 +159,86 @@ export const BankerProvider = ({ children }) => {
             safeSequence.push(i);
             found = true;
             
-            steps.push({
+            detailedSteps.push({
+              type: 'execute',
+              stepNumber: stepNumber++,
               processIndex: i,
-              work: [...work],
-              finished: [...finish]
+              need: needVals,
+              workBefore: workBefore,
+              workAfter: [...work],
+              allocation: [...alloc[i]],
+              finish: [...finish],
+              safeSequence: [...safeSequence],
+              message: `Process P${i} can execute`,
+              explanation: `Need[P${i}] = [${needVals.join(', ')}] ≤ Work = [${workBefore.join(', ')}]. Executing P${i}.`,
+              detailedExplanation: `Process P${i} has Need[P${i}] = [${needVals.join(', ')}] and current Work = [${workBefore.join(', ')}]. Since all elements of Need are less than or equal to Work, P${i} can execute. After P${i} completes, it releases Allocation[P${i}] = [${alloc[i].join(', ')}] back to the system. New Work = [${work.join(', ')}].`
             });
+            
+            if (!skipAnimation && !stepByStepMode) {
+              setActiveProcess(i);
+              setCurrentStep({
+                processIndex: i,
+                work: workBefore,
+                message: `Process P${i} can execute. Need ≤ Work.`
+              });
+              await new Promise(resolve => setTimeout(resolve, animationSpeed));
+            }
             
             break;
           }
         }
       }
+      
+      if (!found && safeSequence.length < numProcesses) {
+        // No process can execute - unsafe state
+        const unfinishedProcesses = [];
+        for (let i = 0; i < numProcesses; i++) {
+          if (!finish[i]) {
+            unfinishedProcesses.push(i);
+          }
+        }
+        
+        detailedSteps.push({
+          type: 'deadlock',
+          stepNumber: stepNumber++,
+          work: [...work],
+          finish: [...finish],
+          safeSequence: [...safeSequence],
+          unfinishedProcesses,
+          message: 'No process can execute - System is UNSAFE',
+          explanation: `No remaining process has Need ≤ Work. Unfinished processes: ${unfinishedProcesses.map(p => `P${p}`).join(', ')}.`,
+          detailedExplanation: `The algorithm cannot proceed. All remaining processes have resource needs that exceed the available resources. This indicates the system is in an UNSAFE state.`
+        });
+      }
+    }
+    
+    if (found || safeSequence.length === numProcesses) {
+      detailedSteps.push({
+        type: 'complete',
+        stepNumber: stepNumber++,
+        work: [...work],
+        finish: [...finish],
+        safeSequence: [...safeSequence],
+        message: 'All processes completed - System is SAFE',
+        explanation: `Safe sequence found: ${safeSequence.map(p => `P${p}`).join(' → ')}`,
+        detailedExplanation: `All processes have been executed successfully in the order: ${safeSequence.map(p => `P${p}`).join(' → ')}. The system is in a SAFE state.`
+      });
     }
     
     setActiveProcess(null);
     setCurrentStep(null);
+    setAllSteps(detailedSteps);
     
     const isSafe = safeSequence.length === numProcesses;
     setSafetyResult({
       isSafe,
       safeSequence,
-      steps
+      steps: detailedSteps
     });
     
     setIsRunning(false);
-    return { isSafe, safeSequence };
-  }, [allocation, available, max, numProcesses, numResources, animationSpeed]);
+    return { isSafe, safeSequence, steps: detailedSteps };
+  }, [allocation, available, max, numProcesses, numResources, animationSpeed, stepByStepMode]);
 
   // Resource Request Handler
   const requestResources = useCallback(async (processIndex, request) => {
