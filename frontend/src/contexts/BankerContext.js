@@ -360,15 +360,54 @@ export const BankerProvider = ({ children }) => {
     
     const tempAvailable = available.map((val, j) => val - request[j]);
     
+    // Show simulation state
+    setRequestSimulation({
+      phase: 'validating',
+      processIndex,
+      request,
+      tempAllocation,
+      tempAvailable,
+      originalAllocation: allocation,
+      originalAvailable: available
+    });
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    setRequestSimulation(prev => ({ ...prev, phase: 'checking_safety' }));
+    
     // Run safety check
-    const { isSafe } = await runSafetyAlgorithm(tempAllocation, tempAvailable);
+    const { isSafe, safeSequence } = await runSafetyAlgorithm(tempAllocation, tempAvailable, true);
     
     if (isSafe) {
+      setRequestSimulation(prev => ({ ...prev, phase: 'granted', isSafe, safeSequence }));
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       setAllocation(tempAllocation);
       setAvailable(tempAvailable);
-      return { granted: true, reason: 'System remains in safe state' };
+      setRequestSimulation(null);
+      
+      return { 
+        granted: true, 
+        reason: `Request granted. System remains in safe state with sequence: ${safeSequence.map(p => `P${p}`).join(' → ')}`,
+        tempAllocation,
+        tempAvailable,
+        safeSequence
+      };
     } else {
-      return { granted: false, reason: 'System would enter unsafe state' };
+      setRequestSimulation(prev => ({ ...prev, phase: 'denied', isSafe }));
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Rollback animation
+      setRequestSimulation(prev => ({ ...prev, phase: 'rollback' }));
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setRequestSimulation(null);
+      return { 
+        granted: false, 
+        reason: 'Request denied. System would enter unsafe state. No safe sequence exists.',
+        tempAllocation,
+        tempAvailable
+      };
     }
   }, [allocation, available, need, numResources, runSafetyAlgorithm]);
 
