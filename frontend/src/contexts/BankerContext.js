@@ -33,6 +33,15 @@ export const BankerProvider = ({ children }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
   const [activeProcess, setActiveProcess] = useState(null);
+  
+  // Step-by-step execution state
+  const [stepByStepMode, setStepByStepMode] = useState(false);
+  const [allSteps, setAllSteps] = useState([]);
+  const [currentStepIndex, setCurrentStepIndex] = useState(-1);
+  const [isPaused, setIsPaused] = useState(false);
+  
+  // Resource request simulation state
+  const [requestSimulation, setRequestSimulation] = useState(null);
 
   // Calculate Need matrix
   const calculateNeed = useCallback(() => {
