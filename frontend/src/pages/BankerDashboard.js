@@ -5,6 +5,8 @@ import { MatrixDisplay, VectorDisplay } from '@/components/MatrixDisplay';
 import { SystemResourceChart, ProcessResourceChart } from '@/components/ResourceCharts';
 import { ResourceRequestForm } from '@/components/ResourceRequestForm';
 import { SafetyAlgorithmDisplay } from '@/components/SafetyAlgorithmDisplay';
+import { StepByStepSafetyDisplay } from '@/components/StepByStepSafetyDisplay';
+import { InteractiveResourceRequest } from '@/components/InteractiveResourceRequest';
 import { ProcessList } from '@/components/ProcessList';
 import { TheoryPanel } from '@/components/TheoryPanel';
 import { ConfigurationPanel } from '@/components/ConfigurationPanel';
