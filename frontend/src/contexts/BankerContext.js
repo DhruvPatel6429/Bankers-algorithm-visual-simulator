@@ -519,6 +519,11 @@ export const BankerProvider = ({ children }) => {
     isRunning,
     currentStep,
     activeProcess,
+    stepByStepMode,
+    allSteps,
+    currentStepIndex,
+    isPaused,
+    requestSimulation,
     setAnimationSpeed,
     updateDimensions,
     updateAllocation,
@@ -529,7 +534,14 @@ export const BankerProvider = ({ children }) => {
     terminateProcess,
     resetSystem,
     loadExample,
-    importState
+    importState,
+    enableStepByStepMode,
+    disableStepByStepMode,
+    stepForward,
+    stepBackward,
+    resetSteps,
+    playSteps,
+    pauseSteps
   };
 
   return (
