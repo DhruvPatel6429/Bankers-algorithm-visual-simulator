@@ -240,26 +240,115 @@ export const BankerProvider = ({ children }) => {
     return { isSafe, safeSequence, steps: detailedSteps };
   }, [allocation, available, max, numProcesses, numResources, animationSpeed, stepByStepMode]);
 
-  // Resource Request Handler
+  // Step-by-step controls
+  const enableStepByStepMode = useCallback(() => {
+    setStepByStepMode(true);
+    setCurrentStepIndex(-1);
+  }, []);
+  
+  const disableStepByStepMode = useCallback(() => {
+    setStepByStepMode(false);
+    setCurrentStepIndex(-1);
+    setIsPaused(false);
+    setActiveProcess(null);
+    setCurrentStep(null);
+  }, []);
+  
+  const stepForward = useCallback(() => {
+    if (currentStepIndex < allSteps.length - 1) {
+      const nextIndex = currentStepIndex + 1;
+      setCurrentStepIndex(nextIndex);
+      const step = allSteps[nextIndex];
+      
+      if (step.type === 'execute') {
+        setActiveProcess(step.processIndex);
+      } else {
+        setActiveProcess(null);
+      }
+      
+      setCurrentStep(step);
+    }
+  }, [currentStepIndex, allSteps]);
+  
+  const stepBackward = useCallback(() => {
+    if (currentStepIndex > 0) {
+      const prevIndex = currentStepIndex - 1;
+      setCurrentStepIndex(prevIndex);
+      const step = allSteps[prevIndex];
+      
+      if (step.type === 'execute') {
+        setActiveProcess(step.processIndex);
+      } else {
+        setActiveProcess(null);
+      }
+      
+      setCurrentStep(step);
+    }
+  }, [currentStepIndex, allSteps]);
+  
+  const resetSteps = useCallback(() => {
+    setCurrentStepIndex(-1);
+    setActiveProcess(null);
+    setCurrentStep(null);
+  }, []);
+  
+  const playSteps = useCallback(async () => {
+    setIsPaused(false);
+    for (let i = currentStepIndex + 1; i < allSteps.length; i++) {
+      if (isPaused) break;
+      setCurrentStepIndex(i);
+      const step = allSteps[i];
+      
+      if (step.type === 'execute') {
+        setActiveProcess(step.processIndex);
+      } else {
+        setActiveProcess(null);
+      }
+      
+      setCurrentStep(step);
+      await new Promise(resolve => setTimeout(resolve, animationSpeed));
+    }
+  }, [currentStepIndex, allSteps, isPaused, animationSpeed]);
+  
+  const pauseSteps = useCallback(() => {
+    setIsPaused(true);
+  }, []);
+
+  // Resource Request Handler with Enhanced Simulation
   const requestResources = useCallback(async (processIndex, request) => {
     // Validate: Request <= Need
+    const validationErrors = [];
     for (let j = 0; j < numResources; j++) {
       if (request[j] > need[processIndex][j]) {
-        return {
-          granted: false,
-          reason: `Request exceeds Need for process P${processIndex}`
-        };
+        validationErrors.push({
+          type: 'exceeds_need',
+          resource: j,
+          requested: request[j],
+          need: need[processIndex][j],
+          message: `R${j}: Requested ${request[j]} but Need is only ${need[processIndex][j]}`
+        });
       }
     }
     
     // Validate: Request <= Available
     for (let j = 0; j < numResources; j++) {
       if (request[j] > available[j]) {
-        return {
-          granted: false,
-          reason: `Request exceeds Available resources`
-        };
+        validationErrors.push({
+          type: 'exceeds_available',
+          resource: j,
+          requested: request[j],
+          available: available[j],
+          message: `R${j}: Requested ${request[j]} but only ${available[j]} available`
+        });
       }
+    }
+    
+    if (validationErrors.length > 0) {
+      return {
+        granted: false,
+        reason: validationErrors.map(e => e.message).join(', '),
+        validationErrors
+      };
     }
     
     // Tentatively allocate
