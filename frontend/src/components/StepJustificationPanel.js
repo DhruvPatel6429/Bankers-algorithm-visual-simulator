@@ -23,29 +23,16 @@ import { cn } from '@/lib/utils';
 export const StepJustificationPanel = ({ safetyResult, isRunning }) => {
   const [showMath, setShowMath] = useState(false);
 
-  // Debug logging
-  console.log('StepJustificationPanel render:', { 
-    hasSafetyResult: !!safetyResult, 
-    isRunning, 
-    stepsCount: safetyResult?.steps?.length,
-    steps: safetyResult?.steps
-  });
-
-  if (!safetyResult || isRunning) {
-    console.log('StepJustificationPanel: returning null', { safetyResult: !!safetyResult, isRunning });
-    return null;
-  }
+  if (!safetyResult || isRunning) return null;
 
   const generateJustifications = () => {
     if (!safetyResult.steps || safetyResult.steps.length === 0) {
-      console.log('No steps found in safetyResult');
       return [];
     }
 
-    const executeSteps = safetyResult.steps.filter(step => step.type === 'execute');
-    console.log('Execute steps found:', executeSteps.length, 'out of', safetyResult.steps.length);
-
-    return executeSteps.map((step, index) => {
+    return safetyResult.steps
+      .filter(step => step.type === 'execute')  // Only process execution steps
+      .map((step, index) => {
         const processIndex = step.processIndex;
         const workBefore = step.workBefore || [];
         const workAfter = step.workAfter || [];
