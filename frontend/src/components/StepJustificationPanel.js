@@ -78,6 +78,8 @@ export const StepJustificationPanel = ({ safetyResult, isRunning }) => {
   };
 
   const justifications = generateJustifications();
+  
+  console.log('Justifications generated:', justifications.length, justifications);
 
   const exportToText = () => {
     let text = `Banker's Algorithm - Step Justification Report\n`;
