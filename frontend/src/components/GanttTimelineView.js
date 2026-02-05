@@ -25,10 +25,8 @@ export const GanttTimelineView = ({ safetyResult, isRunning }) => {
   const chartRef = useRef(null);
   const containerRef = useRef(null);
 
-  if (!safetyResult || isRunning) return null;
-
   const generateTimelineData = () => {
-    if (!safetyResult.steps || safetyResult.steps.length === 0) {
+    if (!safetyResult || !safetyResult.steps || safetyResult.steps.length === 0) {
       return [];
     }
 
@@ -77,6 +75,9 @@ export const GanttTimelineView = ({ safetyResult, isRunning }) => {
       stepCount: timelineData.length
     };
   }, [timelineData, processes]);
+
+  // Early return after all hooks are called
+  if (!safetyResult || isRunning) return null;
 
   const exportAsPNG = async () => {
     if (!chartRef.current) return;
