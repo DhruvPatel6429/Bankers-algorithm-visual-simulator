@@ -169,6 +169,12 @@ export const BankerDashboard = () => {
                 </div>
               </ScrollArea>
             </div>
+
+            {/* Gantt Timeline View */}
+            <GanttTimelineView 
+              safetyResult={safetyResult}
+              isRunning={isRunning}
+            />
           </div>
 
           {/* Right Sidebar - Process Control & Theory */}
