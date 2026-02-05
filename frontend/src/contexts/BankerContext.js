@@ -10,29 +10,116 @@ export const useBanker = () => {
   return context;
 };
 
-export const BankerProvider = ({ children }) => {
+// Preset scenarios for comparison
+export const PRESET_SCENARIOS = {
+  SAFE_DEFAULT: {
+    name: 'Safe Scenario (Default)',
+    allocation: [
+      [0, 1, 0],
+      [2, 0, 0],
+      [3, 0, 2],
+      [2, 1, 1],
+      [0, 0, 2]
+    ],
+    max: [
+      [7, 5, 3],
+      [3, 2, 2],
+      [9, 0, 2],
+      [2, 2, 2],
+      [4, 3, 3]
+    ],
+    available: [3, 3, 2]
+  },
+  UNSAFE_SCENARIO: {
+    name: 'Unsafe Scenario',
+    allocation: [
+      [0, 1, 0],
+      [2, 0, 0],
+      [3, 0, 2],
+      [2, 1, 1],
+      [0, 0, 2]
+    ],
+    max: [
+      [7, 5, 3],
+      [3, 2, 2],
+      [9, 0, 2],
+      [2, 2, 2],
+      [4, 3, 3]
+    ],
+    available: [1, 0, 0] // Very low resources - unsafe
+  },
+  HIGH_UTILIZATION: {
+    name: 'High Resource Utilization',
+    allocation: [
+      [2, 2, 1],
+      [3, 1, 2],
+      [4, 0, 3],
+      [1, 2, 2],
+      [2, 1, 1]
+    ],
+    max: [
+      [5, 4, 3],
+      [6, 3, 4],
+      [7, 2, 5],
+      [4, 4, 4],
+      [5, 3, 3]
+    ],
+    available: [2, 2, 2]
+  },
+  LOW_UTILIZATION: {
+    name: 'Low Resource Utilization',
+    allocation: [
+      [0, 0, 1],
+      [1, 0, 0],
+      [1, 1, 0],
+      [0, 1, 0],
+      [1, 0, 1]
+    ],
+    max: [
+      [7, 5, 3],
+      [3, 2, 2],
+      [9, 0, 2],
+      [2, 2, 2],
+      [4, 3, 3]
+    ],
+    available: [7, 6, 5] // Many available resources
+  },
+  CRITICAL_STATE: {
+    name: 'Critical Resource State',
+    allocation: [
+      [1, 2, 0],
+      [2, 1, 1],
+      [3, 0, 2],
+      [2, 1, 1],
+      [1, 1, 2]
+    ],
+    max: [
+      [4, 5, 2],
+      [5, 3, 3],
+      [6, 2, 4],
+      [4, 3, 3],
+      [3, 4, 4]
+    ],
+    available: [2, 2, 1] // Just enough to be safe
+  }
+};
+
+export const BankerProvider = ({ children, initialState = null }) => {
+  // Use initialState if provided, otherwise use default
+  const defaultScenario = PRESET_SCENARIOS.SAFE_DEFAULT;
+  const initial = initialState || defaultScenario;
+  
   const [numProcesses, setNumProcesses] = useState(5);
   const [numResources, setNumResources] = useState(3);
-  const [allocation, setAllocation] = useState([
-    [0, 1, 0],
-    [2, 0, 0],
-    [3, 0, 2],
-    [2, 1, 1],
-    [0, 0, 2]
-  ]);
-  const [max, setMax] = useState([
-    [7, 5, 3],
-    [3, 2, 2],
-    [9, 0, 2],
-    [2, 2, 2],
-    [4, 3, 3]
-  ]);
-  const [available, setAvailable] = useState([3, 3, 2]);
+  const [allocation, setAllocation] = useState(initial.allocation);
+  const [max, setMax] = useState(initial.max);
+  const [available, setAvailable] = useState(initial.available);
   const [animationSpeed, setAnimationSpeed] = useState(1000); // ms
   const [safetyResult, setSafetyResult] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
   const [activeProcess, setActiveProcess] = useState(null);
+  const [scenarioName, setScenarioName] = useState(initial.name || 'Custom');
   
   // Step-by-step execution state
   const [stepByStepMode, setStepByStepMode] = useState(false);
@@ -42,6 +129,19 @@ export const BankerProvider = ({ children }) => {
   
   // Resource request simulation state
   const [requestSimulation, setRequestSimulation] = useState(null);
+
+  // Load a preset scenario
+  const loadPreset = useCallback((presetKey) => {
+    const preset = PRESET_SCENARIOS[presetKey];
+    if (preset) {
+      setAllocation(preset.allocation);
+      setMax(preset.max);
+      setAvailable(preset.available);
+      setScenarioName(preset.name);
+      setSafetyResult(null);
+      setRequestSimulation(null);
+    }
+  }, []);
 
   // Calculate Need matrix
   const calculateNeed = useCallback(() => {
@@ -199,312 +299,141 @@ export const BankerProvider = ({ children }) => {
         }
         
         detailedSteps.push({
-          type: 'deadlock',
+          type: 'unsafe',
           stepNumber: stepNumber++,
           work: [...work],
           finish: [...finish],
-          safeSequence: [...safeSequence],
           unfinishedProcesses,
-          message: 'No process can execute - System is UNSAFE',
-          explanation: `No remaining process has Need ≤ Work. Unfinished processes: ${unfinishedProcesses.map(p => `P${p}`).join(', ')}.`,
-          detailedExplanation: `The algorithm cannot proceed. All remaining processes have resource needs that exceed the available resources. This indicates the system is in an UNSAFE state.`
+          message: 'System is in UNSAFE state',
+          explanation: `Cannot find a process that can execute. Remaining processes: P${unfinishedProcesses.join(', P')}`
         });
       }
     }
-    
-    if (found || safeSequence.length === numProcesses) {
-      detailedSteps.push({
-        type: 'complete',
-        stepNumber: stepNumber++,
-        work: [...work],
-        finish: [...finish],
-        safeSequence: [...safeSequence],
-        message: 'All processes completed - System is SAFE',
-        explanation: `Safe sequence found: ${safeSequence.map(p => `P${p}`).join(' → ')}`,
-        detailedExplanation: `All processes have been executed successfully in the order: ${safeSequence.map(p => `P${p}`).join(' → ')}. The system is in a SAFE state.`
-      });
-    }
-    
+
+    const result = {
+      isSafe: safeSequence.length === numProcesses,
+      safeSequence,
+      steps: detailedSteps,
+      finalWork: work
+    };
+
+    setSafetyResult(result);
+    setAllSteps(detailedSteps);
+    setIsRunning(false);
     setActiveProcess(null);
     setCurrentStep(null);
-    setAllSteps(detailedSteps);
     
-    const isSafe = safeSequence.length === numProcesses;
-    setSafetyResult({
-      isSafe,
-      safeSequence,
-      steps: detailedSteps
-    });
-    
-    setIsRunning(false);
-    return { isSafe, safeSequence, steps: detailedSteps };
+    return result;
   }, [allocation, available, max, numProcesses, numResources, animationSpeed, stepByStepMode]);
 
-  // Step-by-step controls
-  const enableStepByStepMode = useCallback(() => {
-    setStepByStepMode(true);
-    setCurrentStepIndex(-1);
-  }, []);
-  
-  const disableStepByStepMode = useCallback(() => {
-    setStepByStepMode(false);
-    setCurrentStepIndex(-1);
-    setIsPaused(false);
-    setActiveProcess(null);
-    setCurrentStep(null);
-  }, []);
-  
-  const stepForward = useCallback(() => {
+  // Step-by-step navigation
+  const goToStep = useCallback((index) => {
+    if (index >= 0 && index < allSteps.length) {
+      setCurrentStepIndex(index);
+      const step = allSteps[index];
+      if (step.processIndex !== undefined) {
+        setActiveProcess(step.processIndex);
+      }
+    }
+  }, [allSteps]);
+
+  const nextStep = useCallback(() => {
     if (currentStepIndex < allSteps.length - 1) {
-      const nextIndex = currentStepIndex + 1;
-      setCurrentStepIndex(nextIndex);
-      const step = allSteps[nextIndex];
-      
-      if (step.type === 'execute') {
-        setActiveProcess(step.processIndex);
-      } else {
-        setActiveProcess(null);
-      }
-      
-      setCurrentStep(step);
+      goToStep(currentStepIndex + 1);
     }
-  }, [currentStepIndex, allSteps]);
-  
-  const stepBackward = useCallback(() => {
+  }, [currentStepIndex, allSteps.length, goToStep]);
+
+  const prevStep = useCallback(() => {
     if (currentStepIndex > 0) {
-      const prevIndex = currentStepIndex - 1;
-      setCurrentStepIndex(prevIndex);
-      const step = allSteps[prevIndex];
-      
-      if (step.type === 'execute') {
-        setActiveProcess(step.processIndex);
-      } else {
-        setActiveProcess(null);
-      }
-      
-      setCurrentStep(step);
+      goToStep(currentStepIndex - 1);
     }
-  }, [currentStepIndex, allSteps]);
-  
+  }, [currentStepIndex, goToStep]);
+
   const resetSteps = useCallback(() => {
     setCurrentStepIndex(-1);
     setActiveProcess(null);
-    setCurrentStep(null);
-  }, []);
-  
-  const playSteps = useCallback(async () => {
-    setIsPaused(false);
-    for (let i = currentStepIndex + 1; i < allSteps.length; i++) {
-      if (isPaused) break;
-      setCurrentStepIndex(i);
-      const step = allSteps[i];
-      
-      if (step.type === 'execute') {
-        setActiveProcess(step.processIndex);
-      } else {
-        setActiveProcess(null);
-      }
-      
-      setCurrentStep(step);
-      await new Promise(resolve => setTimeout(resolve, animationSpeed));
-    }
-  }, [currentStepIndex, allSteps, isPaused, animationSpeed]);
-  
-  const pauseSteps = useCallback(() => {
-    setIsPaused(true);
   }, []);
 
-  // Resource Request Handler with Enhanced Simulation
-  const requestResources = useCallback(async (processIndex, request) => {
-    // Validate: Request <= Need
-    const validationErrors = [];
-    for (let j = 0; j < numResources; j++) {
-      if (request[j] > need[processIndex][j]) {
-        validationErrors.push({
-          type: 'exceeds_need',
-          resource: j,
-          requested: request[j],
-          need: need[processIndex][j],
-          message: `R${j}: Requested ${request[j]} but Need is only ${need[processIndex][j]}`
-        });
-      }
-    }
-    
-    // Validate: Request <= Available
-    for (let j = 0; j < numResources; j++) {
-      if (request[j] > available[j]) {
-        validationErrors.push({
-          type: 'exceeds_available',
-          resource: j,
-          requested: request[j],
-          available: available[j],
-          message: `R${j}: Requested ${request[j]} but only ${available[j]} available`
-        });
-      }
-    }
-    
-    if (validationErrors.length > 0) {
-      return {
-        granted: false,
-        reason: validationErrors.map(e => e.message).join(', '),
-        validationErrors
-      };
-    }
-    
-    // Tentatively allocate
-    const tempAllocation = allocation.map((row, i) => 
-      i === processIndex 
-        ? row.map((val, j) => val + request[j])
-        : [...row]
-    );
-    
-    const tempAvailable = available.map((val, j) => val - request[j]);
-    
-    // Show simulation state
-    setRequestSimulation({
-      phase: 'validating',
-      processIndex,
-      request,
-      tempAllocation,
-      tempAvailable,
-      originalAllocation: allocation,
-      originalAvailable: available
-    });
-    
+  const toggleStepByStepMode = useCallback(() => {
+    setStepByStepMode(prev => !prev);
+    resetSteps();
+  }, [resetSteps]);
+
+  // Resource request handling
+  const simulateResourceRequest = useCallback(async (processIndex, request) => {
+    setRequestSimulation({ phase: 'validating', processIndex, request });
     await new Promise(resolve => setTimeout(resolve, 500));
-    
-    setRequestSimulation(prev => ({ ...prev, phase: 'checking_safety' }));
-    
-    // Run safety check
-    const { isSafe, safeSequence } = await runSafetyAlgorithm(tempAllocation, tempAvailable, true);
-    
-    if (isSafe) {
-      setRequestSimulation(prev => ({ ...prev, phase: 'granted', isSafe, safeSequence }));
-      await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Validate request
+    let isValid = true;
+    for (let j = 0; j < numResources; j++) {
+      const needValue = need[processIndex][j];
+      if (request[j] > needValue || request[j] > available[j]) {
+        isValid = false;
+        break;
+      }
+    }
+
+    if (!isValid) {
+      setRequestSimulation({ 
+        phase: 'denied', 
+        processIndex, 
+        request,
+        reason: 'Request exceeds Need or Available resources'
+      });
+      return { granted: false };
+    }
+
+    // Simulate temporary allocation
+    const tempAllocation = allocation.map((row, i) => 
+      i === processIndex ? row.map((val, j) => val + request[j]) : [...row]
+    );
+    const tempAvailable = available.map((val, j) => val - request[j]);
+
+    setRequestSimulation({ phase: 'checking_safety', processIndex, request });
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // Check if new state is safe
+    const safetyCheck = await runSafetyAlgorithm(tempAllocation, tempAvailable, true);
+
+    if (safetyCheck.isSafe) {
+      setRequestSimulation({ 
+        phase: 'granted', 
+        processIndex, 
+        request,
+        safeSequence: safetyCheck.safeSequence,
+        newAllocation: tempAllocation,
+        newAvailable: tempAvailable
+      });
       
+      // Apply the changes
       setAllocation(tempAllocation);
       setAvailable(tempAvailable);
-      setRequestSimulation(null);
       
-      return { 
-        granted: true, 
-        reason: `Request granted. System remains in safe state with sequence: ${safeSequence.map(p => `P${p}`).join(' → ')}`,
-        tempAllocation,
-        tempAvailable,
-        safeSequence
-      };
+      return { granted: true, safeSequence: safetyCheck.safeSequence };
     } else {
-      setRequestSimulation(prev => ({ ...prev, phase: 'denied', isSafe }));
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Rollback animation
-      setRequestSimulation(prev => ({ ...prev, phase: 'rollback' }));
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setRequestSimulation(null);
-      return { 
-        granted: false, 
-        reason: 'Request denied. System would enter unsafe state. No safe sequence exists.',
-        tempAllocation,
-        tempAvailable
-      };
+      setRequestSimulation({ 
+        phase: 'denied', 
+        processIndex, 
+        request,
+        reason: 'Granting this request would lead to an unsafe state'
+      });
+      return { granted: false };
     }
   }, [allocation, available, need, numResources, runSafetyAlgorithm]);
 
-  // Terminate Process
-  const terminateProcess = useCallback((processIndex) => {
-    // Release all allocated resources
-    const newAvailable = [...available];
-    for (let j = 0; j < numResources; j++) {
-      newAvailable[j] += allocation[processIndex][j];
-    }
-    
-    const newAllocation = [...allocation];
-    newAllocation[processIndex] = Array(numResources).fill(0);
-    
-    const newMax = [...max];
-    newMax[processIndex] = Array(numResources).fill(0);
-    
-    setAvailable(newAvailable);
-    setAllocation(newAllocation);
-    setMax(newMax);
-  }, [allocation, available, max, numResources]);
-
-  // Reset system
-  const resetSystem = useCallback(() => {
-    setAllocation([
-      [0, 1, 0],
-      [2, 0, 0],
-      [3, 0, 2],
-      [2, 1, 1],
-      [0, 0, 2]
-    ]);
-    setMax([
-      [7, 5, 3],
-      [3, 2, 2],
-      [9, 0, 2],
-      [2, 2, 2],
-      [4, 3, 3]
-    ]);
-    setAvailable([3, 3, 2]);
-    setNumProcesses(5);
-    setNumResources(3);
-    setSafetyResult(null);
-    setCurrentStep(null);
-    setActiveProcess(null);
+  const clearRequestSimulation = useCallback(() => {
+    setRequestSimulation(null);
   }, []);
 
-  // Load example
-  const loadExample = useCallback((exampleType) => {
-    if (exampleType === 'silberschatz') {
-      setNumProcesses(5);
-      setNumResources(3);
-      setAllocation([
-        [0, 1, 0],
-        [2, 0, 0],
-        [3, 0, 2],
-        [2, 1, 1],
-        [0, 0, 2]
-      ]);
-      setMax([
-        [7, 5, 3],
-        [3, 2, 2],
-        [9, 0, 2],
-        [2, 2, 2],
-        [4, 3, 3]
-      ]);
-      setAvailable([3, 3, 2]);
-    } else if (exampleType === 'custom') {
-      setNumProcesses(4);
-      setNumResources(4);
-      setAllocation([
-        [0, 0, 1, 2],
-        [1, 0, 0, 0],
-        [1, 3, 5, 4],
-        [0, 6, 3, 2]
-      ]);
-      setMax([
-        [0, 0, 1, 2],
-        [1, 7, 5, 0],
-        [2, 3, 5, 6],
-        [0, 6, 5, 2]
-      ]);
-      setAvailable([1, 5, 2, 0]);
-    }
+  // Import state function
+  const importState = useCallback((newState) => {
+    if (newState.numProcesses) setNumProcesses(newState.numProcesses);
+    if (newState.numResources) setNumResources(newState.numResources);
+    if (newState.allocation) setAllocation(newState.allocation);
+    if (newState.max) setMax(newState.max);
+    if (newState.available) setAvailable(newState.available);
     setSafetyResult(null);
-  }, []);
-
-  // Import state from JSON
-  const importState = useCallback((importedData) => {
-    setNumProcesses(importedData.numProcesses);
-    setNumResources(importedData.numResources);
-    setAllocation(importedData.allocation);
-    setMax(importedData.max);
-    setAvailable(importedData.available);
-    setAnimationSpeed(importedData.animationSpeed);
-    setSafetyResult(null);
-    setCurrentStep(null);
-    setActiveProcess(null);
   }, []);
 
   const value = {
@@ -519,29 +448,30 @@ export const BankerProvider = ({ children }) => {
     isRunning,
     currentStep,
     activeProcess,
+    scenarioName,
     stepByStepMode,
     allSteps,
     currentStepIndex,
     isPaused,
     requestSimulation,
-    setAnimationSpeed,
+    setNumProcesses,
+    setNumResources,
     updateDimensions,
     updateAllocation,
     updateMax,
     updateAvailable,
+    setAnimationSpeed,
     runSafetyAlgorithm,
-    requestResources,
-    terminateProcess,
-    resetSystem,
-    loadExample,
-    importState,
-    enableStepByStepMode,
-    disableStepByStepMode,
-    stepForward,
-    stepBackward,
+    toggleStepByStepMode,
+    goToStep,
+    nextStep,
+    prevStep,
     resetSteps,
-    playSteps,
-    pauseSteps
+    setIsPaused,
+    simulateResourceRequest,
+    clearRequestSimulation,
+    importState,
+    loadPreset
   };
 
   return (
