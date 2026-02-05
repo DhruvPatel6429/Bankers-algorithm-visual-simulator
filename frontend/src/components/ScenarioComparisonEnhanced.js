@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { BankerProvider, useBanker } from '@/contexts/BankerContext';
+import { BankerProvider, useBanker, PRESET_SCENARIOS } from '@/contexts/BankerContext';
 import { ComparisonProvider } from '@/contexts/ComparisonContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,19 +8,20 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { MatrixDisplay, VectorDisplay } from '@/components/MatrixDisplay';
 import { MatrixDiffDisplay, VectorDiffDisplay } from '@/components/MatrixDiffDisplay';
 import { SystemResourceChart, ProcessResourceChart } from '@/components/ResourceCharts';
 import { SafetyAlgorithmDisplay } from '@/components/SafetyAlgorithmDisplay';
 import { ResourceRequestForm } from '@/components/ResourceRequestForm';
 import { ComparativeMetricsDashboard } from '@/components/ComparativeMetricsDashboard';
-import { Copy, X, ArrowLeftRight, GitCompare, Link } from 'lucide-react';
+import { Copy, X, ArrowLeftRight, GitCompare, Link, RefreshCw, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Individual Scenario Panel with state export
-const ScenarioPanel = ({ scenarioId, onStateChange, showCloseButton = true }) => {
+const ScenarioPanel = ({ scenarioId, initialState, onStateChange, showCloseButton = true }) => {
   return (
-    <BankerProvider>
+    <BankerProvider initialState={initialState}>
       <ScenarioPanelContent 
         scenarioId={scenarioId}
         onStateChange={onStateChange}
@@ -45,10 +46,13 @@ const ScenarioPanelContent = React.memo(({ scenarioId, onStateChange, showCloseB
     updateMax,
     updateAvailable,
     activeProcess,
+    loadPreset,
+    scenarioName
   } = bankerState;
 
   // Track previous state to avoid unnecessary onStateChange calls
   const prevStateRef = useRef();
+  const [hasChanges, setHasChanges] = useState(false);
   
   // Notify parent of state changes - only when actual values change
   useEffect(() => {
@@ -59,7 +63,8 @@ const ScenarioPanelContent = React.memo(({ scenarioId, onStateChange, showCloseB
       max,
       available,
       need,
-      safetyResult
+      safetyResult,
+      scenarioName
     };
     
     const currentStateStr = JSON.stringify(currentState);
@@ -70,6 +75,7 @@ const ScenarioPanelContent = React.memo(({ scenarioId, onStateChange, showCloseB
       console.log(`Scenario ${scenarioId}: State changed`);
       onStateChange(currentState);
       prevStateRef.current = currentState;
+      setHasChanges(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -80,29 +86,63 @@ const ScenarioPanelContent = React.memo(({ scenarioId, onStateChange, showCloseB
     JSON.stringify(available), 
     JSON.stringify(need), 
     JSON.stringify(safetyResult),
-    scenarioId
+    scenarioId,
+    scenarioName
   ]);
 
   return (
     <div className="flex flex-col h-full">
       {/* Scenario Header */}
       <div className="flex items-center justify-between p-4 border-b border-border/50 bg-card/30">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div className={cn(
             "w-3 h-3 rounded-full",
             scenarioId === 1 ? "bg-blue-500" : "bg-purple-500"
           )} />
-          <h3 className="font-bold text-lg">Scenario {scenarioId}</h3>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-lg">Scenario {scenarioId}</h3>
+              {hasChanges && (
+                <Badge variant="outline" className="bg-yellow-500/10 border-yellow-500/50 text-yellow-400 text-xs">
+                  Modified
+                </Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">{scenarioName}</p>
+          </div>
           {safetyResult && (
-            <span className={cn(
-              "text-xs px-2 py-1 rounded-full border font-medium",
-              safetyResult.isSafe 
-                ? "bg-green-500/10 border-green-500/50 text-green-400"
-                : "bg-red-500/10 border-red-500/50 text-red-400"
-            )}>
+            <Badge
+              variant="outline"
+              className={cn(
+                "ml-2",
+                safetyResult.isSafe 
+                  ? "bg-green-500/10 border-green-500/50 text-green-400"
+                  : "bg-red-500/10 border-red-500/50 text-red-400"
+              )}
+            >
               {safetyResult.isSafe ? "SAFE" : "UNSAFE"}
-            </span>
+            </Badge>
           )}
+        </div>
+        
+        {/* Preset Loader Dropdown */}
+        <div className="flex items-center gap-2">
+          <select
+            onChange={(e) => {
+              if (e.target.value) {
+                loadPreset(e.target.value);
+                setHasChanges(false);
+              }
+            }}
+            className="px-3 py-1 text-xs rounded border border-border/50 bg-card/50 text-foreground hover:bg-card/80 transition-colors"
+          >
+            <option value="">Load Preset...</option>
+            <option value="SAFE_DEFAULT">Safe (Default)</option>
+            <option value="UNSAFE_SCENARIO">Unsafe State</option>
+            <option value="HIGH_UTILIZATION">High Utilization</option>
+            <option value="LOW_UTILIZATION">Low Utilization</option>
+            <option value="CRITICAL_STATE">Critical State</option>
+          </select>
         </div>
       </div>
 
@@ -229,6 +269,10 @@ export const ScenarioComparisonEnhanced = ({ onClose }) => {
   const [stateA, setStateA] = useState(null);
   const [stateB, setStateB] = useState(null);
   
+  // Initialize with different presets for meaningful comparison
+  const [initialStateA] = useState(PRESET_SCENARIOS.SAFE_DEFAULT);
+  const [initialStateB] = useState(PRESET_SCENARIOS.HIGH_UTILIZATION);
+  
   const scrollAreaRefA = useRef(null);
   const scrollAreaRefB = useRef(null);
 
@@ -252,6 +296,41 @@ export const ScenarioComparisonEnhanced = ({ onClose }) => {
       targetElement.scrollTop = sourceElement.scrollTop;
     }
   };
+
+  // Calculate comparison summary
+  const comparisonSummary = React.useMemo(() => {
+    if (!stateA || !stateB) return null;
+    
+    const diffCount = {
+      allocation: 0,
+      max: 0,
+      available: 0
+    };
+    
+    // Count differences in allocation
+    for (let i = 0; i < stateA.numProcesses; i++) {
+      for (let j = 0; j < stateA.numResources; j++) {
+        if (stateA.allocation[i][j] !== stateB.allocation[i][j]) diffCount.allocation++;
+        if (stateA.max[i][j] !== stateB.max[i][j]) diffCount.max++;
+      }
+    }
+    
+    // Count differences in available
+    for (let j = 0; j < stateA.numResources; j++) {
+      if (stateA.available[j] !== stateB.available[j]) diffCount.available++;
+    }
+    
+    const totalDiffs = diffCount.allocation + diffCount.max + diffCount.available;
+    const safetyDifferent = stateA.safetyResult?.isSafe !== stateB.safetyResult?.isSafe;
+    
+    return {
+      totalDifferences: totalDiffs,
+      diffCount,
+      safetyDifferent,
+      scenario1Name: stateA.scenarioName || 'Scenario 1',
+      scenario2Name: stateB.scenarioName || 'Scenario 2'
+    };
+  }, [stateA, stateB]);
 
   return (
     <ComparisonProvider>
@@ -295,11 +374,44 @@ export const ScenarioComparisonEnhanced = ({ onClose }) => {
                 </Button>
               </div>
             </div>
+            
+            {/* Comparison Summary Banner */}
+            {comparisonSummary && comparisonSummary.totalDifferences > 0 && (
+              <div className="mt-3 p-3 rounded-lg bg-blue-500/10 border border-blue-500/50">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-blue-400" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-400">
+                      Comparing: {comparisonSummary.scenario1Name} vs {comparisonSummary.scenario2Name}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Found {comparisonSummary.totalDifferences} differences
+                      {comparisonSummary.safetyDifferent && (
+                        <span className="ml-2 text-orange-400">
+                          • Safety states differ
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 text-xs">
+                    <Badge variant="outline" className="bg-blue-500/10">
+                      Allocation: {comparisonSummary.diffCount.allocation} diffs
+                    </Badge>
+                    <Badge variant="outline" className="bg-purple-500/10">
+                      Max: {comparisonSummary.diffCount.max} diffs
+                    </Badge>
+                    <Badge variant="outline" className="bg-green-500/10">
+                      Available: {comparisonSummary.diffCount.available} diffs
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Content */}
-        <div className="h-[calc(100vh-5rem)]">
+        <div className="h-[calc(100vh-7rem)]">
           <Tabs value={viewMode} onValueChange={setViewMode} className="h-full flex flex-col">
             <div className="border-b border-border/50 bg-card/20 px-6">
               <TabsList className="bg-transparent">
@@ -324,6 +436,7 @@ export const ScenarioComparisonEnhanced = ({ onClose }) => {
                 >
                   <ScenarioPanel 
                     scenarioId={1}
+                    initialState={initialStateA}
                     onStateChange={handleStateAChange}
                     showCloseButton={false}
                   />
@@ -337,6 +450,7 @@ export const ScenarioComparisonEnhanced = ({ onClose }) => {
                 >
                   <ScenarioPanel 
                     scenarioId={2}
+                    initialState={initialStateB}
                     onStateChange={handleStateBChange}
                     showCloseButton={false}
                   />
